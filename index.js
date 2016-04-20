@@ -13,6 +13,13 @@ app.get('/', function(request, response) {
   response.render('pages/index');
 });
 
+app.get('/webhook/', function (req, res) {
+  if (req.query['hub.verify_token'] === 'CAN_I_JUST_USE_ANYTHING_HERE') {
+    res.send(req.query['hub.challenge']);
+  }
+  res.send('Error, wrong validation token');
+})
+
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
