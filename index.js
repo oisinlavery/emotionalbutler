@@ -14,6 +14,7 @@ app.get('/', function(request, response) {
 });
 
 app.get('/webhook/', function (req, res) {
+  console.log(req)
   if (req.query['hub.verify_token'] === 'CAN_I_JUST_USE_ANYTHING_HERE') {
     res.send(req.query['hub.challenge']);
   }
