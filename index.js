@@ -132,7 +132,7 @@ function sendGifs() {
         console.log("results = ", res)
 
         messageData = {
-          text: "https://www.google.com"
+          text: res.data[0].url
         }
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
