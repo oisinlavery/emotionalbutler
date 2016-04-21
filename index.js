@@ -126,7 +126,7 @@ function sendGenericMessage(sender) {
 function sendGifs() {
     giphy.search('pokemon').then(function(res) {
         
-        console.log(res)
+        console.log("results = " + res)
 
         messageData = {
             "attachment": {
