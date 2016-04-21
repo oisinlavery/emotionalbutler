@@ -137,7 +137,7 @@ function sendGifs() {
                 "image_url": result.embed_url
             })
 
-            console.log("does this loop?")
+            console.log("does this loop?", elements.count)
         }
 
         var messageData = {
