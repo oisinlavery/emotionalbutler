@@ -35,13 +35,9 @@ app.post('/webhook/', function(req, res) {
         sender = event.sender.id
         if (event.message && event.message.text) {
             text = event.message.text
-            if (text === 'Generic') {
-                sendGenericMessage(sender)
-                continue
-            } else if (text === 'emotion') {
 
-                sendGifs(sender)
-            }
+            sendGifs(text)
+            
             sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
         }
         if (event.postback) {
@@ -123,8 +119,8 @@ function sendGenericMessage(sender) {
     })
 }
 
-function sendGifs() {
-    giphy.search('pokemon').then(function(res) {
+function sendGifs(emotion) {
+    giphy.search(emotion).then(function(res) {
 
         var elements = []
 
