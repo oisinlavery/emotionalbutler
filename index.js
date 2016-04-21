@@ -130,14 +130,14 @@ function sendGifs() {
 
         var elements = []
 
-        for (var result in res.data[0]) {
-
+        for (var i = 0; i < res.data[0].length; i++) {
+            
+            var result = res.data[i]
+            
             elements.push({
                 "title": result.source_tld,
                 "image_url": result.embed_url
             })
-
-            console.log("does this loop?", elements.count)
         }
 
         var messageData = {
