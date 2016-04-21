@@ -3,6 +3,8 @@ var bodyParser = require('body-parser')
 var request = require('request')
 var app = express()
 
+var giphy = require('giphy-api')()
+
 var token = "EAAHFrm1kIZAABAPYZBPDLi32BizaAoMaXMLWUFX0DK2yZC1wnG6Ax5SWHjTzD2nsNb3GCKtQN4bGLqEJud6kzCFxTXJZBXYzBMFEc8SSavHI1hvh4JHptHAJxZBgLvi6NItZCrJIIUVZB4llQhvKli5QYqFd875nkILDiFddjKmrwZDZD"
 
 app.set('port', (process.env.PORT || 5000))
@@ -36,6 +38,9 @@ app.post('/webhook/', function (req, res) {
             if (text === 'Generic') {
                 sendGenericMessage(sender)
                 continue
+            }
+            else if (text == 'emotion') {
+                sendGifs(sender)
             }
             sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
         }
@@ -116,6 +121,62 @@ function sendGenericMessage(sender) {
             console.log('Error: ', response.body.error)
         }
     })
+}
+
+function sendGifs() {
+    giphy.search('pokemon').then(function(res) {
+        
+        messageData = {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [{
+                        "title": "First card",
+                        "subtitle": "Element #1 of an hscroll",
+                        "image_url": "http://messengerdemo.parseapp.com/img/rift.png",
+                        "buttons": [{
+                            "type": "web_url",
+                            "url": "https://www.messenger.com",
+                            "title": "web url"
+                        }, {
+                            "type": "postback",
+                            "title": "Postback",
+                            "payload": "Payload for first element in a generic bubble",
+                        }],
+                    }, {
+                        "title": "Second card",
+                        "subtitle": "Element #2 of an hscroll",
+                        "image_url": "http://messengerdemo.parseapp.com/img/gearvr.png",
+                        "buttons": [{
+                            "type": "postback",
+                            "title": "Postback",
+                            "payload": "Payload for second element in a generic bubble",
+                        }],
+                    }]
+                }
+            }
+        }
+
+        messageData = {
+          text: res
+        }
+        request({
+            url: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: {access_token:token},
+            method: 'POST',
+            json: {
+                recipient: {id:sender},
+                message: messageData,
+            }
+        }, function(error, response, body) {
+            if (error) {
+                console.log('Error sending messages: ', error)
+            } else if (response.body.error) {
+                console.log('Error: ', response.body.error)
+            }
+        })
+    });
 }
 
 // Spin up the server
