@@ -39,7 +39,7 @@ app.post('/webhook/', function (req, res) {
                 sendGenericMessage(sender)
                 continue
             }
-            else if (text == 'emotion') {
+            else if (text === 'emotion') {
                 sendGifs(sender)
             }
             sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
@@ -126,6 +126,8 @@ function sendGenericMessage(sender) {
 function sendGifs() {
     giphy.search('pokemon').then(function(res) {
         
+        console.log(res)
+
         messageData = {
             "attachment": {
                 "type": "template",
