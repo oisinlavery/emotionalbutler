@@ -149,7 +149,7 @@ function sendGifs() {
           }
         }
 
-        console.log("results = ", res)
+        console.log("results = ", elements)
 
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
