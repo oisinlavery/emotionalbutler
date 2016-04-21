@@ -129,7 +129,7 @@ function sendGenericMessage(sender) {
 function sendGifs() {
     giphy.search('pokemon').then(function(res) {
         
-        // console.log("results = ", res)
+        console.log("results = ", res)
 
         messageData = {
           text: "https://www.google.com"
