@@ -136,7 +136,7 @@ function sendGifs() {
 
             elements.push({
                 "title": "title:"+ result.source_tld,
-                "image_url": result.embed_url
+                "image_url": result.images.original.url
             })
         }
 
