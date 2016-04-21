@@ -135,7 +135,7 @@ function sendGifs() {
             console.log(result)
 
             elements.push({
-                "title": result.source_tld,
+                "title": "title:"+ result.source_tld,
                 "image_url": result.embed_url
             })
         }
