@@ -40,9 +40,7 @@ app.post('/webhook/', function(req, res) {
                 continue
             } else if (text === 'emotion') {
 
-                setTimeout(function() {
-                    sendGifs(sender)
-                }, 1000)
+                sendGifs(sender)
             }
             sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
         }
@@ -128,7 +126,7 @@ function sendGenericMessage(sender) {
 function sendGifs() {
     giphy.search('pokemon').then(function(res) {
 
-        console.log("pokemon = ", res.data[0])
+        console.log("pokemon: ", res.data[0])
 
         var elements = []
 
@@ -138,6 +136,8 @@ function sendGifs() {
                 "title": result.source_tld,
                 "image_url": result.embed_url
             })
+
+            console.log("does this loop?")
         }
 
         var messageData = {
@@ -150,7 +150,8 @@ function sendGifs() {
             }
         }
 
-        console.log("messageData = ", messageData)
+        console.log("WITNESS ME")
+        console.log("messageData: ", messageData)
 
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
