@@ -56,7 +56,7 @@ app.post('/webhook/', function(req, res) {
 })
 
 function sendTextMessage(sender, text) {
-    messageData = {
+    var messageData = {
         text: text
     }
     request({
@@ -77,7 +77,7 @@ function sendTextMessage(sender, text) {
 }
 
 function sendGenericMessage(sender) {
-    messageData = {
+    var messageData = {
         "attachment": {
             "type": "template",
             "payload": {
@@ -129,12 +129,12 @@ function sendGifs() {
     giphy.search('pokemon').then(function(res) {
 
         console.log("pokemon = ", res.data[0])
-        
+
         var elements = []
 
         for (var result in res.data[0]) {
 
-            elements.append({
+            elements.push({
                 "title": result.source_tld,
                 "image_url": result.embed_url
             })
@@ -150,9 +150,23 @@ function sendGifs() {
             }
         }
 
-        console.log("elements = ", elements)
+        console.log("messageData = ", messageData)
 
-        
+        request({
+            url: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: { access_token: token },
+            method: 'POST',
+            json: {
+                recipient: { id: sender },
+                message: messageData,
+            }
+        }, function(error, response, body) {
+            if (error) {
+                console.log('Error sending messages: ', error)
+            } else if (response.body.error) {
+                console.log('Error: ', response.body.error)
+            }
+        })
     });
 }
 
