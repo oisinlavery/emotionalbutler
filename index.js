@@ -129,11 +129,41 @@ function sendGenericMessage(sender) {
 function sendGifs() {
     giphy.search('pokemon').then(function(res) {
         
-        console.log("results = ", res)
+        var elements = []
+
+        for (result in res.data[0]) {
+
+          elements.append({
+              "title": result.source_tld,
+              "image_url": result.embed_url
+          })
+        }
 
         messageData = {
-          text: res.data[0].url
+          "attachment": {
+              "type": "template",
+              "payload": {
+                  "template_type": "generic",
+                  "elements": [{
+                      "title": "First card",
+                      "subtitle": "Element #1 of an hscroll",
+                      "image_url": "http://messengerdemo.parseapp.com/img/rift.png",
+                      "buttons": [{
+                          "type": "web_url",
+                          "url": "https://www.messenger.com",
+                          "title": "web url"
+                      }, {
+                          "type": "postback",
+                          "title": "Postback",
+                          "payload": "Payload for first element in a generic bubble",
+                      }],
+                  }
+              }
+          }
         }
+
+        console.log("results = ", res)
+
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
             qs: {access_token:token},
