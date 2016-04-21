@@ -10,25 +10,25 @@ var token = "EAAHFrm1kIZAABAPYZBPDLi32BizaAoMaXMLWUFX0DK2yZC1wnG6Ax5SWHjTzD2nsNb
 app.set('port', (process.env.PORT || 5000))
 
 // Process application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.urlencoded({ extended: false }))
 
 // Process application/json
 app.use(bodyParser.json())
 
 // Index route
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
     res.send('Hello world, I am a chat bot')
 })
 
 // for Facebook verification
-app.get('/webhook/', function (req, res) {
+app.get('/webhook/', function(req, res) {
     if (req.query['hub.verify_token'] === 'my_voice_is_my_password_verify_me') {
         res.send(req.query['hub.challenge'])
     }
     res.send('Error, wrong token')
 })
 
-app.post('/webhook/', function (req, res) {
+app.post('/webhook/', function(req, res) {
     messaging_events = req.body.entry[0].messaging
     for (i = 0; i < messaging_events.length; i++) {
         event = req.body.entry[0].messaging[i]
@@ -38,18 +38,17 @@ app.post('/webhook/', function (req, res) {
             if (text === 'Generic') {
                 sendGenericMessage(sender)
                 continue
-            }
-            else if (text === 'emotion') {
+            } else if (text === 'emotion') {
 
-              setTimeout(function() {
-                sendGifs(sender)
-              }, 1000)
+                setTimeout(function() {
+                    sendGifs(sender)
+                }, 1000)
             }
             sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
         }
         if (event.postback) {
             text = JSON.stringify(event.postback)
-            sendTextMessage(sender, "Postback received: "+text.substring(0, 200), token)
+            sendTextMessage(sender, "Postback received: " + text.substring(0, 200), token)
             continue
         }
     }
@@ -58,14 +57,14 @@ app.post('/webhook/', function (req, res) {
 
 function sendTextMessage(sender, text) {
     messageData = {
-        text:text
+        text: text
     }
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
-        qs: {access_token:token},
+        qs: { access_token: token },
         method: 'POST',
         json: {
-            recipient: {id:sender},
+            recipient: { id: sender },
             message: messageData,
         }
     }, function(error, response, body) {
@@ -111,10 +110,10 @@ function sendGenericMessage(sender) {
     }
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
-        qs: {access_token:token},
+        qs: { access_token: token },
         method: 'POST',
         json: {
-            recipient: {id:sender},
+            recipient: { id: sender },
             message: messageData,
         }
     }, function(error, response, body) {
@@ -128,44 +127,30 @@ function sendGenericMessage(sender) {
 
 function sendGifs() {
     giphy.search('pokemon').then(function(res) {
-        
+
         var elements = []
 
-        for (result in res.data[0]) {
+        for (var result in res.data[0]) {
 
-          elements.append({
-              "title": result.source_tld,
-              "image_url": result.embed_url
-          })
+            elements.append({
+                "title": result.source_tld,
+                "image_url": result.embed_url
+            })
         }
 
         var messageData = {
-          "attachment": {
-              "type": "template",
-              "payload": {
-                  "template_type": "generic",
-                  "elements": elements
-              }
-          }
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": elements
+                }
+            }
         }
 
-        console.log("results = ", elements)
+        console.log("elements = ", elements)
 
-        request({
-            url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: {access_token:token},
-            method: 'POST',
-            json: {
-                recipient: {id:sender},
-                message: messageData,
-            }
-        }, function(error, response, body) {
-            if (error) {
-                console.log('Error sending messages: ', error)
-            } else if (response.body.error) {
-                console.log('Error: ', response.body.error)
-            }
-        })
+        
     });
 }
 
