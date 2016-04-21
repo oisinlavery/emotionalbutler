@@ -127,12 +127,12 @@ function sendGenericMessage(sender) {
 }
 
 function sendGifs() {
-    // giphy.search('pokemon').then(function(res) {
+    giphy.search('pokemon').then(function(res) {
         
         // console.log("results = ", res)
 
         messageData = {
-          text: "https://wwwgoogle.com"
+          text: "https://www.google.com"
         }
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -149,7 +149,7 @@ function sendGifs() {
                 console.log('Error: ', response.body.error)
             }
         })
-    // });
+    });
 }
 
 // Spin up the server
