@@ -161,7 +161,7 @@ function sendGifs() {
         }
 
         messageData = {
-          text: res
+          text: res.images[0].url
         }
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
