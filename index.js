@@ -126,10 +126,10 @@ function sendGenericMessage(sender) {
 function sendGifs() {
     // giphy.search('pokemon').then(function(res) {
         
-        console.log("results = ", res)
+        // console.log("results = ", res)
 
         messageData = {
-          text: res.images[0].url
+          text: "https://wwwgoogle.com"
         }
         request({
             url: 'https://graph.facebook.com/v2.6/me/messages',
