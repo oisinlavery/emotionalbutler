@@ -40,7 +40,10 @@ app.post('/webhook/', function (req, res) {
                 continue
             }
             else if (text === 'emotion') {
+
+              setTimeout(function() {
                 sendGifs(sender)
+              }, 1000)
             }
             sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
         }
