@@ -1,12 +1,24 @@
+var facebookToken = 'EAAHFrm1kIZAABAPYZBPDLi32BizaAoMaXMLWUFX0DK2yZC1wnG6Ax5SWHjTzD2nsNb3GCKtQN4bGLqEJud6kzCFxTXJZBXYzBMFEc8SSavHI1hvh4JHptHAJxZBgLvi6NItZCrJIIUVZB4llQhvKli5QYqFd875nkILDiFddjKmrwZDZD'
+var giphyToken = ''
+var apiaiClientAccessToken = 'd99406dc5e8e444483f85563254f2010'
+var apiaiDeveloperAccessToken = 'a0ea0ab4d9b34975a3572ecaa350474c'
+
 var express = require('express')
 var bodyParser = require('body-parser')
 var request = require('request')
-var rx = require('rx')
-var giphy = require('giphy-api')()
+var events = require('events')
+var q = require('q')
 
-var token = "EAAHFrm1kIZAABAPYZBPDLi32BizaAoMaXMLWUFX0DK2yZC1wnG6Ax5SWHjTzD2nsNb3GCKtQN4bGLqEJud6kzCFxTXJZBXYzBMFEc8SSavHI1hvh4JHptHAJxZBgLvi6NItZCrJIIUVZB4llQhvKli5QYqFd875nkILDiFddjKmrwZDZD"
+var giphy = require('giphy-api')()
+var apiai = require('apiai')(apiaiClientAccessToken, '')
+
 
 var app = express()
+
+var eventEmitter = new events.EventEmitter();
+
+
+
 
 
 app.set('port', (process.env.PORT || 5000))
@@ -19,7 +31,7 @@ app.use(bodyParser.json())
 
 // Index route
 app.get('/', function(req, res) {
-    res.send('Hello world, I am a chat bot')
+    res.send('Hello world, I am a chat botski!')
 })
 
 // for Facebook verification
@@ -39,71 +51,82 @@ app.post('/webhook/', function(req, res) {
         if (event.message && event.message.text) {
             text = event.message.text
 
-            sendGifs(text)
+            eventEmitter.emit('messageReceived', text)
         }
         if (event.postback) {
             text = JSON.stringify(event.postback)
-            sendTextMessage(sender, "Postback received: " + text.substring(0, 200), token)
+            sendTextMessage(sender, "Postback received: " + text.substring(0, 200), facebookToken)
             continue
         }
     }
     res.sendStatus(200)
 })
 
-app.get('/emotion/:emotion', function(req, res) {
+app.get('/message/:message', function(req, res) {
     res.send("req:", req.params)
-    sendGifs(req.params.emotion)
+    eventEmitter.emit('messageReceived', req.params.message)
 })
 
+eventEmitter.on('messageReceived', function(message) {
+    console.log(message)
 
+    var request = apiai.textRequest(message)
 
-function dealWithMessage() {
+    request.on('response', function(response) {
+        console.log(response.result.parameters.emotion)
+        eventEmitter.emit('emotionUnderstood', response.result.parameters.emotion)
+    });
+     
+    request.on('error', function(error) {
+        console.log(error);
+    });
+     
+    request.end()
+})
 
-}
+eventEmitter.on('emotionUnderstood', function(emotion) {
 
-function getGifData(emotion) {
-
-}
-
-function sendGifs(emotion) {
     giphy.search(emotion).then(function(res) {
+        var message = createMessage(res)
+        postMessage(message)
+    })
+})
 
-        var elements = []
+function createMessage(res) {
 
-        for (var i = 0; i < 5; i++) {
-            
-            var result = res.data[i]
-            elements.push({
-                "title": "title:"+ result.source_tld,
-                "image_url": result.images.original.url
-            })
-        }
+    var elements = []
 
-        var messageObject = {
-            "attachment": {
-                "type": "template",
-                "payload": {
-                    "template_type": "generic",
-                    "elements": elements
-                }
+    for (var i = 0; i < 5; i++) {
+        
+        var result = res.data[i]
+        elements.push({
+            "title": "title:"+ result.source_tld,
+            "image_url": result.images.original.url
+        })
+    }
+
+    return {
+        "attachment": {
+            "type": "template",
+            "payload": {
+                "template_type": "generic",
+                "elements": elements
             }
         }
-
-        postMessage(messageObject)
-    });
+    }
 }
 
-function postMessage(messageObject) {
+function postMessage(message) {
 
-    console.log("sendMessage: ", messageData)
+    console.log("postMessage: ", JSON.stringify(message))
 
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
-        qs: { access_token: token },
+        qs: { access_token: facebookToken },
         method: 'POST',
         json: {
             recipient: { id: sender },
-            message: messageData,
+            message: message,
         }
     }, function(error, response, body) {
         if (error) {

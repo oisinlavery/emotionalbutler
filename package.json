@@ -7,14 +7,18 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "dependencies": {
+    "apiai": "^2.0.0",
     "body-parser": "^1.15.0",
     "express": "^4.13.3",
     "giphy-api": "^1.1.15",
+    "q": "^1.4.1",
     "request": "^2.72.0",
-    "rx": "^4.1.0"
+    "rx": "^4.1.0",
+    "rx-node": "^1.0.2"
   },
   "repository": {
     "type": "git",
@@ -25,5 +29,8 @@
     "heroku",
     "express"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^1.9.1"
+  }
 }
