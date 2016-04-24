@@ -57,11 +57,6 @@ app.post('/webhook/', function(req, res) {
                 postReply(createReply(results))
             })
         }
-        if (event.postback) {
-            text = JSON.stringify(event.postback)
-            sendTextMessage(sender, "Postback received: " + text.substring(0, 200), facebookToken)
-            continue
-        }
     }
     res.sendStatus(200)
 })
@@ -118,7 +113,6 @@ function createReply(results) {
         
         var result = results[i]
         elements.push({
-            "title": "title:"+ result.source_tld,
             "image_url": result.images.original.url
         })
     }
