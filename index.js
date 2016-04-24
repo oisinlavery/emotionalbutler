@@ -31,13 +31,13 @@ app.use(bodyParser.json())
 
 // Index route
 app.get('/', function(req, res) {
-    res.send('Hello world, I am a chat botski!')
+    res.status(200).send('Hello world, I am a chat botski!'.toString())
 })
 
 // for Facebook verification
 app.get('/webhook/', function(req, res) {
     if (req.query['hub.verify_token'] === 'I_am_your_password_peeXqcJcPV48dZ') {
-        res.send(req.query['hub.challenge'])
+        res.status(200).send(req.query['hub.challenge'].toString())
     }
     res.send('Error, wrong token')
 })
@@ -51,7 +51,11 @@ app.post('/webhook/', function(req, res) {
         if (event.message && event.message.text) {
             text = event.message.text
 
-            eventEmitter.emit('messageReceived', text)
+            understandMessage(text)
+            .then(searchGiphy)
+            .then(function(results) {
+                postReply(createReply(results))
+            })
         }
         if (event.postback) {
             text = JSON.stringify(event.postback)
@@ -63,42 +67,56 @@ app.post('/webhook/', function(req, res) {
 })
 
 app.get('/message/:message', function(req, res) {
-    res.send("req:", req.params)
-    eventEmitter.emit('messageReceived', req.params.message)
+
+    understandMessage(req.params.message)
+    .then(searchGiphy)
+    .then(function(results) {
+        res.status(200).send("reply: "+ JSON.stringify(createReply(results)))
+    })
 })
 
-eventEmitter.on('messageReceived', function(message) {
-    console.log(message)
+function understandMessage(message) {
+    var deferred = q.defer()
 
     var request = apiai.textRequest(message)
 
     request.on('response', function(response) {
         console.log(response.result.parameters.emotion)
-        eventEmitter.emit('emotionUnderstood', response.result.parameters.emotion)
+        deferred.resolve(response.result.parameters.emotion);
     });
      
     request.on('error', function(error) {
-        console.log(error);
+        deferred.reject(new Error(error));
     });
      
     request.end()
-})
 
-eventEmitter.on('emotionUnderstood', function(emotion) {
+    return deferred.promise
+}
 
-    giphy.search(emotion).then(function(res) {
-        var message = createMessage(res)
-        postMessage(message)
-    })
-})
+function searchGiphy(query){
+    var deferred = q.defer()
 
-function createMessage(res) {
+    giphy.search(query, function(error, result) {
+
+        if(error){
+            deferred.reject(new Error(error));
+        }
+        else{
+            deferred.resolve(result.data)
+        }
+    }) 
+
+    return deferred.promise
+}
+
+function createReply(results) {
 
     var elements = []
 
     for (var i = 0; i < 5; i++) {
         
-        var result = res.data[i]
+        var result = results[i]
         elements.push({
             "title": "title:"+ result.source_tld,
             "image_url": result.images.original.url
@@ -116,9 +134,10 @@ function createMessage(res) {
     }
 }
 
-function postMessage(message) {
+function postReply(reply) {
 
-    console.log("postMessage: ", JSON.stringify(message))
+    var deferred = q.defer()
+    console.log("postMessage: ", JSON.stringify(reply))
 
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -126,11 +145,11 @@ function postMessage(message) {
         method: 'POST',
         json: {
             recipient: { id: sender },
-            message: message,
+            message: reply,
         }
     }, function(error, response, body) {
         if (error) {
-            console.log('Error sending messages: ', error)
+            console.log('Error sending reply: ', error)
         } else if (response.body.error) {
             console.log('Error: ', response.body.error)
         }
