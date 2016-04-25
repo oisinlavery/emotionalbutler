@@ -98,6 +98,7 @@ function searchGiphy(query){
             deferred.reject(new Error(error));
         }
         else{
+            console.log(result.data)
             deferred.resolve(result.data)
         }
     }) 
@@ -113,6 +114,7 @@ function createReply(results) {
         
         var result = results[i]
         elements.push({
+            "title": "giphy: " + result.bitly_url,
             "image_url": result.images.original.url
         })
     }
