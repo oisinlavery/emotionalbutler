@@ -64,6 +64,10 @@ app.post('/webhook/', function(req, res) {
 app.get('/message/:message', function(req, res) {
 
     understandMessage(req.params.message)
+    .fail(function(error) {
+        console.log(error)
+        res.status(200).send("I don't understand :(")
+    })
     .then(searchGiphy)
     .then(function(results) {
         res.status(200).send("reply: "+ JSON.stringify(createReply(results)))
@@ -71,16 +75,19 @@ app.get('/message/:message', function(req, res) {
 })
 
 function understandMessage(message) {
+    console.log(message)
     var deferred = q.defer()
 
     var request = apiai.textRequest(message)
 
     request.on('response', function(response) {
-        console.log(response.result.parameters.emotion)
+        console.log(response)
         deferred.resolve(response.result.parameters.emotion);
     });
      
-    request.on('error', function(error) {
+    request.on('error', function(error, x) {
+        console.log(error)
+        console.log(x)
         deferred.reject(new Error(error));
     });
      
@@ -98,7 +105,6 @@ function searchGiphy(query){
             deferred.reject(new Error(error));
         }
         else{
-            console.log(result.data)
             deferred.resolve(result.data)
         }
     }) 
@@ -110,7 +116,7 @@ function createReply(results) {
 
     var elements = []
 
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < 10; i++) {
         
         var result = results[i]
         elements.push({
